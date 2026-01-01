@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Track US inflation from 1913 to present and compare against Bitcoin, Gold, and other assets">
+    <title>{% block title %}Inflation Tracker{% endblock %}</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Plotly.js for charts -->
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="navbar-content">
+            <a href="/" class="navbar-brand">
+                <span class="icon">📈</span>
+                <span class="text-gradient">Inflation Tracker</span>
+            </a>
+            <ul class="navbar-nav">
+                <li><a href="/" class="{{ 'active' if request.path == '/' else '' }}">Dashboard</a></li>
+                <li><a href="/compare" class="{{ 'active' if request.path == '/compare' else '' }}">Compare Assets</a></li>
+            </ul>
+        </div>
+    </nav>
+    
+    <!-- Main Content -->
+    <main class="container">
+        {% block content %}{% endblock %}
+    </main>
+    
+    <!-- Footer -->
+    <footer class="container" style="padding-top: 2rem; padding-bottom: 2rem; text-align: center;">
+        <p class="text-muted" style="font-size: 0.875rem;">
+            Data sources: FRED (CPI), Binance (Crypto), Historical Records (Gold, Silver)
+            <br>
+            <span style="opacity: 0.5;">Built with Flask & Plotly.js</span>
+        </p>
+    </footer>
+    
+    <!-- Custom JS -->
+    <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+</body>
+</html>

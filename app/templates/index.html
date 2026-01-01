@@ -1,0 +1,242 @@
+{% extends "base.html" %}
+
+{% block title %}Inflation Tracker - Dashboard{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="mb-lg">
+    <h1 class="animate-fade-in">
+        <span class="text-gradient">US Inflation Tracker</span>
+    </h1>
+    <p class="text-secondary mt-sm animate-fade-in stagger-1" style="max-width: 800px; line-height: 1.6;">
+        <strong>Inflation</strong> is when prices go up over time, making your money worth less.
+        This dashboard helps you understand how the US Dollar has lost value since 1913,
+        and shows assets that people use to protect their wealth.
+    </p>
+</section>
+
+<!-- Price Tickers -->
+<section class="grid grid-3 mb-lg">
+    <div class="ticker animate-slide-up stagger-1">
+        <div class="ticker-icon btc">₿</div>
+        <div class="ticker-info">
+            <div class="ticker-name">Bitcoin</div>
+            <div class="ticker-price" id="btc-price">Loading...</div>
+        </div>
+    </div>
+    <div class="ticker animate-slide-up stagger-2">
+        <div class="ticker-icon xmr">ɱ</div>
+        <div class="ticker-info">
+            <div class="ticker-name">Monero</div>
+            <div class="ticker-price" id="xmr-price">Loading...</div>
+        </div>
+    </div>
+    <div class="ticker animate-slide-up stagger-3">
+        <div class="ticker-icon gold">Au</div>
+        <div class="ticker-info">
+            <div class="ticker-name">Gold /oz</div>
+            <div class="ticker-price" id="gold-price">Loading...</div>
+        </div>
+    </div>
+</section>
+
+<!-- Stats Cards -->
+<section class="grid grid-4 mb-lg">
+    <div class="card stat-card animate-slide-up stagger-1">
+        <div class="stat-value negative" id="current-inflation">--</div>
+        <div class="stat-label">Current Inflation Rate</div>
+    </div>
+    <div class="card stat-card animate-slide-up stagger-2">
+        <div class="stat-value negative" id="total-inflation">--</div>
+        <div class="stat-label">Total Inflation Since 1913</div>
+    </div>
+    <div class="card stat-card animate-slide-up stagger-3">
+        <div class="stat-value" id="purchasing-power-value">--</div>
+        <div class="stat-label">$1 from 1913 is worth today</div>
+    </div>
+    <div class="card stat-card animate-slide-up stagger-4">
+        <div class="stat-value" id="latest-cpi">--</div>
+        <div class="stat-label">Latest CPI Index</div>
+    </div>
+</section>
+
+<!-- Loading indicator -->
+<div id="dashboard-loading" class="text-center p-md hidden">
+    <div class="spinner" style="margin: 0 auto;"></div>
+    <p class="text-muted mt-sm">Loading data...</p>
+</div>
+
+<!-- Inflation Rate Chart -->
+<section class="card mb-lg animate-fade-in">
+    <div class="card-header">
+        <h3 class="card-title">📉 How Fast Prices Rose Each Year</h3>
+        <div class="tabs">
+            <button class="tab active">All Time</button>
+            <button class="tab">Last 50 Years</button>
+            <button class="tab">Last 20 Years</button>
+        </div>
+    </div>
+    <div class="card-body">
+        <p class="text-muted mb-md" style="font-size: 0.9rem;">
+            Each bar shows how much prices increased that year. Positive = prices went up (bad for your wallet).
+            Notice the spikes during wars and crises.
+        </p>
+        <div id="inflation-chart" class="chart-container"></div>
+    </div>
+</section>
+
+<!-- Purchasing Power Chart -->
+<section class="card mb-lg animate-fade-in">
+    <div class="card-header">
+        <h3 class="card-title">💸 Your Money Is Shrinking</h3>
+    </div>
+    <div class="card-body">
+        <p class="text-muted mb-md" style="font-size: 0.9rem;">
+            This chart shows how the dollar's purchasing power has eroded over time.
+        </p>
+        <div id="purchasing-power-chart" class="chart-container"></div>
+        <p class="text-muted mt-sm" style="font-size: 0.8rem; font-style: italic;">
+            💡 The lower the line goes, the less your money is worth.
+        </p>
+    </div>
+</section>
+
+<!-- Asset Charts: Bitcoin, Monero, and Gold -->
+
+<!-- Intro to Inflation Hedges -->
+<section class="card mb-lg animate-fade-in"
+    style="background: linear-gradient(135deg, rgba(99, 102, 241, 0.08), rgba(139, 92, 246, 0.08));">
+    <div class="card-header">
+        <h3 class="card-title">🛡️ Inflation Hedges: Assets That Fight Back</h3>
+    </div>
+    <div class="card-body">
+        <p class="text-muted" style="font-size: 0.95rem; max-width: 900px; line-height: 1.6;">
+            While the dollar loses value, some assets tend to go <strong>UP</strong> in price. People call these
+            "<strong>inflation hedges</strong>" because they can help protect your savings. Below are three popular ones
+            — notice how their prices have grown while the dollar shrank.
+        </p>
+    </div>
+</section>
+
+<!-- Bitcoin Chart -->
+<section class="card mb-lg animate-fade-in">
+    <div class="card-header">
+        <h3 class="card-title">₿ Bitcoin — Digital Gold</h3>
+    </div>
+    <div class="card-body">
+        <p class="text-muted mb-md" style="font-size: 0.9rem;">
+            Created in 2009, Bitcoin is like digital gold — there will only ever be 21 million coins, and no government
+            can print more.
+            It's the best-performing asset in history, though it's very volatile (big price swings).
+        </p>
+        <div id="btc-chart" class="chart-container"></div>
+    </div>
+</section>
+
+<!-- Monero Chart -->
+<section class="card mb-lg animate-fade-in">
+    <div class="card-header">
+        <h3 class="card-title">ɱ Monero — Private Digital Cash</h3>
+    </div>
+    <div class="card-body">
+        <p class="text-muted mb-md" style="font-size: 0.9rem;">
+            Monero is like Bitcoin, but with privacy built-in. Your transactions are hidden from view,
+            like physical cash. It's favored by those who value financial privacy.
+        </p>
+        <div id="xmr-chart" class="chart-container"></div>
+    </div>
+</section>
+
+<!-- Gold Chart -->
+<section class="card mb-lg animate-fade-in">
+    <div class="card-header">
+        <h3 class="card-title">🥇 Gold — The Original Store of Value</h3>
+    </div>
+    <div class="card-body">
+        <p class="text-muted mb-md" style="font-size: 0.9rem;">
+            Gold has been valued for thousands of years. It can't be printed, doesn't rust, and
+            has kept its value through wars, recessions, and the rise and fall of empires.
+        </p>
+        <div id="gold-chart" class="chart-container"></div>
+        <p class="text-muted mt-sm" style="font-size: 0.8rem; font-style: italic;">
+            📈 From $20/oz in 1913 to over $2,600/oz today — Gold has roughly kept pace with inflation over 100+ years.
+        </p>
+    </div>
+</section>
+
+<!-- Inflation Calculator -->
+<section class="card mb-lg animate-fade-in">
+    <div class="card-header">
+        <h3 class="card-title">🧮 Inflation Calculator</h3>
+    </div>
+    <div class="card-body">
+        <div class="grid grid-4 gap-md">
+            <div class="form-group">
+                <label class="form-label">Amount ($)</label>
+                <input type="number" id="calc-amount" class="form-control" value="100" min="0" step="0.01">
+            </div>
+            <div class="form-group">
+                <label class="form-label">From Year</label>
+                <input type="number" id="calc-from-year" class="form-control" value="1913" min="1913" max="2024">
+            </div>
+            <div class="form-group">
+                <label class="form-label">To Year</label>
+                <input type="number" id="calc-to-year" class="form-control" value="2024" min="1913" max="2024">
+            </div>
+            <div class="form-group">
+                <label class="form-label">&nbsp;</label>
+                <button class="btn btn-primary w-full" onclick="calculateInflation()">
+                    Calculate
+                </button>
+            </div>
+        </div>
+        <div id="calc-result" class="mt-md"></div>
+    </div>
+</section>
+
+<!-- Asset Calculator -->
+<section class="card mb-lg animate-fade-in"
+    style="background: linear-gradient(135deg, rgba(247, 147, 26, 0.05), rgba(255, 215, 0, 0.05));">
+    <div class="card-header">
+        <h3 class="card-title">📈 Asset Investment Calculator</h3>
+    </div>
+    <div class="card-body">
+        <p class="text-muted mb-md" style="font-size: 0.9rem;">
+            See how an investment in Bitcoin, Monero, or Gold would have performed vs just holding cash.
+        </p>
+        <div class="grid grid-4 gap-md">
+            <div class="form-group">
+                <label class="form-label">Amount ($)</label>
+                <input type="number" id="asset-amount" class="form-control" value="100" min="0" step="0.01">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Asset</label>
+                <select id="asset-type" class="form-control">
+                    <option value="bitcoin">Bitcoin</option>
+                    <option value="monero">Monero</option>
+                    <option value="gold">Gold</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">From Year</label>
+                <input type="number" id="asset-from-year" class="form-control" value="2015" min="2009" max="2024">
+            </div>
+            <div class="form-group">
+                <label class="form-label">&nbsp;</label>
+                <button class="btn btn-primary w-full" onclick="calculateAssetGrowth()">
+                    Calculate
+                </button>
+            </div>
+        </div>
+        <div id="asset-calc-result" class="mt-md"></div>
+        <div id="asset-calc-chart" class="chart-container mt-md" style="min-height: 300px; display: none;"></div>
+    </div>
+</section>
+
+<!-- Quick Links - at bottom -->
+<section class="text-center mb-lg">
+    <a href="/compare" class="btn btn-primary">
+        📊 Compare Assets Over Time
+    </a>
+</section>
+{% endblock %}

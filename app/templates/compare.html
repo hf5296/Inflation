@@ -1,0 +1,227 @@
+{% extends "base.html" %}
+
+{% block title %}Compare Assets - Inflation Tracker{% endblock %}
+
+{% block content %}
+<!-- Header -->
+<section class="mb-lg">
+    <h1 class="animate-fade-in">
+        <span class="text-gradient">Compare Assets</span>
+    </h1>
+    <p class="text-secondary mt-sm animate-fade-in stagger-1">
+        Compare the performance of different assets normalized to a common base year.
+        See how Bitcoin, Gold, and other assets perform relative to inflation.
+    </p>
+</section>
+
+<!-- Asset Selector -->
+<section class="card mb-lg animate-fade-in">
+    <div class="card-header">
+        <h3 class="card-title">Select Assets to Compare (Max 5)</h3>
+    </div>
+    <div class="card-body">
+        <!-- Cryptocurrencies -->
+        <div class="mb-md">
+            <h4 class="text-secondary mb-sm" style="font-size: 0.875rem;">Cryptocurrencies</h4>
+            <div class="asset-selector">
+                <button class="asset-chip selected" data-type="crypto" data-symbol="bitcoin"
+                    onclick="toggleAsset('crypto', 'bitcoin', 'Bitcoin')">
+                    <span class="dot" style="background: #f7931a;"></span>
+                    Bitcoin (BTC)
+                </button>
+                <button class="asset-chip" data-type="crypto" data-symbol="monero"
+                    onclick="toggleAsset('crypto', 'monero', 'Monero')">
+                    <span class="dot" style="background: #ff6600;"></span>
+                    Monero (XMR)
+                </button>
+                <button class="asset-chip" data-type="crypto" data-symbol="solana"
+                    onclick="toggleAsset('crypto', 'solana', 'Solana')">
+                    <span class="dot" style="background: #9945ff;"></span>
+                    Solana (SOL)
+                </button>
+            </div>
+        </div>
+
+        <!-- Precious Metals -->
+        <div class="mb-md">
+            <h4 class="text-secondary mb-sm" style="font-size: 0.875rem;">Precious Metals</h4>
+            <div class="asset-selector">
+                <button class="asset-chip selected" data-type="metal" data-symbol="gold"
+                    onclick="toggleAsset('metal', 'gold', 'Gold')">
+                    <span class="dot" style="background: #ffd700;"></span>
+                    Gold (XAU)
+                </button>
+            </div>
+        </div>
+
+        <!-- Inflation Metrics -->
+        <div class="mb-md">
+            <h4 class="text-secondary mb-sm" style="font-size: 0.875rem;">Inflation Metrics</h4>
+            <div class="asset-selector">
+                <button class="asset-chip" data-type="inflation" data-symbol="cpi"
+                    onclick="toggleAsset('inflation', 'cpi', 'CPI Index')">
+                    <span class="dot" style="background: #6366f1;"></span>
+                    CPI Index
+                </button>
+                <button class="asset-chip selected" data-type="inflation" data-symbol="cumulative"
+                    onclick="toggleAsset('inflation', 'cumulative', 'Cumulative Inflation')">
+                    <span class="dot" style="background: #ef4444;"></span>
+                    Cumulative Inflation
+                </button>
+                <button class="asset-chip" data-type="inflation" data-symbol="purchasing_power"
+                    onclick="toggleAsset('inflation', 'purchasing_power', 'Purchasing Power')">
+                    <span class="dot" style="background: #10b981;"></span>
+                    Purchasing Power
+                </button>
+            </div>
+        </div>
+
+        <!-- Forex -->
+        <div class="mb-md">
+            <h4 class="text-secondary mb-sm" style="font-size: 0.875rem;">Currency Pairs</h4>
+            <div class="asset-selector">
+                <button class="asset-chip" data-type="forex" data-symbol="USD/JPY"
+                    onclick="toggleAsset('forex', 'USD/JPY', 'USD/JPY')">
+                    <span class="dot" style="background: #e91e63;"></span>
+                    USD/JPY
+                </button>
+                <button class="asset-chip" data-type="forex" data-symbol="USD/EUR"
+                    onclick="toggleAsset('forex', 'USD/EUR', 'USD/EUR')">
+                    <span class="dot" style="background: #2196f3;"></span>
+                    USD/EUR
+                </button>
+                <button class="asset-chip" data-type="forex" data-symbol="USD/GBP"
+                    onclick="toggleAsset('forex', 'USD/GBP', 'USD/GBP')">
+                    <span class="dot" style="background: #4caf50;"></span>
+                    USD/GBP
+                </button>
+            </div>
+        </div>
+
+        <!-- Update Chart Button -->
+        <div class="flex items-center gap-md mt-md"
+            style="padding-top: 1rem; border-top: 1px solid var(--border-subtle);">
+            <button class="btn btn-primary" onclick="loadComparisonChart()">
+                Update Chart
+            </button>
+            <p class="text-muted" style="font-size: 0.75rem; margin: 0;">
+                Data will automatically start from the earliest date when all selected assets have data.
+            </p>
+        </div>
+    </div>
+</section>
+
+<!-- Loading indicator -->
+<div id="comparison-loading" class="text-center p-md hidden">
+    <div class="spinner" style="margin: 0 auto;"></div>
+    <p class="text-muted mt-sm">Loading comparison data...</p>
+</div>
+
+<!-- Comparison Chart -->
+<section class="card mb-lg animate-fade-in">
+    <div class="card-header">
+        <h3 class="card-title">📊 Asset Comparison Chart</h3>
+    </div>
+    <div class="card-body">
+        <div id="comparison-chart" class="chart-container" style="min-height: 500px;"></div>
+        <p class="text-muted mt-sm" style="font-size: 0.75rem;">
+            All assets normalized to index 100 at their starting point. Log scale for fair comparison.
+        </p>
+    </div>
+</section>
+
+<!-- Comparison Table -->
+<section class="card mb-lg animate-fade-in">
+    <div class="card-header">
+        <h3 class="card-title">📋 Performance Summary</h3>
+    </div>
+    <div class="card-body">
+        <table class="comparison-table">
+            <thead>
+                <tr>
+                    <th>Asset</th>
+                    <th>Data Source</th>
+                    <th>Total Return</th>
+                    <th>CAGR</th>
+                    <th>Data Range</th>
+                </tr>
+            </thead>
+            <tbody id="comparison-tbody">
+                <tr>
+                    <td colspan="5" class="text-center text-muted">Select assets and click "Update Chart" to see
+                        comparison</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</section>
+
+<!-- Explanation Card -->
+<section class="card mb-lg animate-fade-in">
+    <div class="card-header">
+        <h3 class="card-title">ℹ️ Understanding the Comparison</h3>
+    </div>
+    <div class="card-body">
+        <div class="grid grid-2 gap-md">
+            <div>
+                <h4 style="font-size: 1rem; margin-bottom: 0.5rem;">Logarithmic Scale</h4>
+                <p class="text-secondary" style="font-size: 0.875rem;">
+                    Charts use a log scale so assets with vastly different prices (like $88k BTC vs $4k Gold)
+                    can be compared visually. Equal vertical distances = equal percentage changes.
+                </p>
+            </div>
+            <div>
+                <h4 style="font-size: 1rem; margin-bottom: 0.5rem;">Common Date Range</h4>
+                <p class="text-secondary" style="font-size: 0.875rem;">
+                    Data automatically starts from when ALL selected assets have data.
+                    For BTC + Gold, this means data starts from 2009 (when BTC was created).
+                </p>
+            </div>
+            <div>
+                <h4 style="font-size: 1rem; margin-bottom: 0.5rem;">CAGR (Compound Annual Growth Rate)</h4>
+                <p class="text-secondary" style="font-size: 0.875rem;">
+                    The annual rate of return that would be required for an investment to
+                    grow from its beginning value to its ending value. Higher CAGR = better
+                    long-term performance.
+                </p>
+            </div>
+            <div>
+                <h4 style="font-size: 1rem; margin-bottom: 0.5rem;">Actual USD Prices</h4>
+                <p class="text-secondary" style="font-size: 0.875rem;">
+                    All values shown are real historical prices in USD, not normalized index values.
+                    This gives you a true picture of how each asset has performed.
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Key Insights -->
+<section class="card mb-lg animate-fade-in"
+    style="background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(139, 92, 246, 0.1));">
+    <div class="card-header">
+        <h3 class="card-title">💡 Key Insights</h3>
+    </div>
+    <div class="card-body">
+        <ul style="list-style: none; padding: 0;">
+            <li class="mb-sm flex items-center gap-sm">
+                <span style="color: var(--success);">✓</span>
+                <span>Since 1913, the US Dollar has lost over 96% of its purchasing power due to inflation</span>
+            </li>
+            <li class="mb-sm flex items-center gap-sm">
+                <span style="color: var(--gold);">✓</span>
+                <span>Gold has risen from $20.67/oz in 1913 to over $2,300/oz today, largely tracking inflation</span>
+            </li>
+            <li class="mb-sm flex items-center gap-sm">
+                <span style="color: var(--bitcoin);">✓</span>
+                <span>Bitcoin has been the best performing asset of the decade, rising from $0.001 in 2009 to $88,000+
+                    today</span>
+            </li>
+            <li class="flex items-center gap-sm">
+                <span style="color: var(--accent-primary);">✓</span>
+                <span>Assets that grow faster than CPI preserve purchasing power over time</span>
+            </li>
+        </ul>
+    </div>
+</section>
+{% endblock %}
